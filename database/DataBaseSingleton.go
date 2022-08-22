@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// db should be initialized at the beginning and only once. It represents the database
 var db *mongo.Database = func() *mongo.Database {
 	// Set client options
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
