@@ -1,9 +1,21 @@
 package datas
 
-import "time"
+import (
+	translate "github.com/bas24/googletranslatefree"
+	"time"
+)
 
 // Text can be translate from en <-> fr
 type Text string
+
+func (text Text) TranslateInFrEn() (fr, en string, err error) {
+	fr, err = translate.Translate(string(text), "fr", "en")
+	if err == nil {
+		return
+	}
+	en, err = translate.Translate(string(text), "en", "fr")
+	return
+}
 
 // timestamp allows to use time.Time but will be json-encoded as asked by the API requirements.
 type timestamp struct {
