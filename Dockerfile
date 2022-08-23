@@ -11,9 +11,9 @@ RUN tar -xf "go1.19.linux-amd64.tar.gz"
 
 RUN mv -v go /usr/local
 
-COPY *go* /home/
+COPY . .
 
-COPY ./script.sh .
+RUN rm Dockerfile
 
 EXPOSE 8080
 

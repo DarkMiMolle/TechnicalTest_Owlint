@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
