@@ -1,8 +1,13 @@
 package datas
 
 import (
+	"context"
 	"fmt"
+	. "github.com/DarkMiMolle/TechnicalTest_Owlint/database"
+	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	translate "github.com/bas24/googletranslatefree"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"time"
 )
@@ -54,4 +59,29 @@ type Comment struct {
 	PublishedAt timestamp `json:"publishedAt"` // PublishedAt is a string in the json file
 	AuthorId    string    `json:"authorId"`
 	TargetId    string    `json:"targetId"`
+}
+
+var lastComment = &Comment{}
+
+func GetComment(id string) *Comment {
+	if lastComment.Id != id {
+		res := DataBase().FindOne(context.Background(), bson.D{{"id", id}})
+		if res == nil {
+			fmt.Println(id, "Not presents.")
+			return nil
+		}
+		util.PanicErr(res.Decode(lastComment))
+	}
+	return lastComment
+}
+func GetCommentOf(targetId string) []*Comment {
+	sortOpt := options.Find().SetSort(bson.D{{"publishedAt", 1}})
+	findRes, _ := DataBase().Find(context.Background(), bson.D{{"targetId", targetId}}, sortOpt)
+	var multipleComment []*Comment
+	fmt.Println(multipleComment)
+	_ = findRes.All(context.Background(), &multipleComment)
+	return multipleComment
+}
+func RecordComment(comment *Comment) {
+	DataBase().InsertOne(context.Background(), comment)
 }

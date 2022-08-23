@@ -24,8 +24,8 @@ var db *mongo.Database = func() *mongo.Database {
 	return client.Database("technical_test_owlint")
 }()
 
-func DataBase() *mongo.Database {
-	return db
+func DataBase() *mongo.Collection {
+	return db.Collection("Comment")
 }
 
 // TODO: filter function maker or something more intuitive/helpful to use
