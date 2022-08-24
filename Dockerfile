@@ -15,6 +15,8 @@ COPY . .
 
 RUN rm Dockerfile
 
+RUN /usr/local/go/bin/go build .
+
 EXPOSE 8080
 
 CMD ["sh", "script.sh"]

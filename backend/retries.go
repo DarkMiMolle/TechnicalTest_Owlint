@@ -2,6 +2,7 @@ package backend
 
 import (
 	"fmt"
+	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	"net/http"
 	"time"
 )
@@ -55,8 +56,10 @@ func MakeRetryPolicy(retryPolicies ...RetryPolicyStep) RetryPolicy {
 }
 
 // RunPolicy execute the call request and will set the response and the error when policy is fully done (max retries or success)
-// That function is won't stop the execution of the main thread, but asking for the willResp/willErr will // TODO: return InComing[Resp/err] instead of using WillSet.
-func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error), willResp WillSet[*http.Response], willErr WillSet[error]) {
+// That function is won't stop the execution of the main thread, but asking for the willResp/willErr will
+func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error)) (InCResp util.InComing[*http.Response], InCErr util.InComing[error]) {
+	InCResp, willResp := util.CreateInComingValueOf[*http.Response]()
+	InCErr, willErr := util.CreateInComingValueOf[error]()
 	go func() {
 		resp, err := call()
 		nbTry := 0
@@ -88,4 +91,5 @@ func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error), willResp
 		willResp.Set(resp)
 		willErr.Set(err)
 	}()
+	return
 }

@@ -5,7 +5,9 @@ nohup sh -c mongod --dbpath /test > mongoLog &
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
-go run .
+# go run .
+
+./TechnicalTest_Owlint
 
 echo "\n========================================"
 echo "\nMongo Log\n"
