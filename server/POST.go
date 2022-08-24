@@ -76,9 +76,9 @@ func PostReplyComment(requestInfo *gin.Context) {
 		}
 	}
 	go forwardToOtherService(newComment)
-	if err := datas.RecordComment(&newComment); err != nil {
+	if err := datas.RecordComment(newComment); err != nil {
 		requestInfo.IndentedJSON(http.StatusNotAcceptable, err.Error())
 		return
 	}
-	requestInfo.IndentedJSON(http.StatusOK, newComment)
+	requestInfo.IndentedJSON(http.StatusOK, newComment.AsThread())
 }

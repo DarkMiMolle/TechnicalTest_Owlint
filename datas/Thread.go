@@ -5,18 +5,21 @@ import (
 	"strings"
 )
 
-// Thread is a succession of (potential) answer link to an original Comment.
-// The MainComment is the default Comment, and every other comment are Replies to it.
+// A Thread is Comment with all replies
+// Each Replies is also a Thread (or a Comment if Replies is nil)
 // It also makes the link between the asked data in the REST request, but it is not represented in the DataBase (it is only build and send as a response)
 type Thread struct {
-	MainComment *Comment   `json:""` /// Don't know if it exists a way to indicate MainComment is the default Comment with json tags.
-	Replies     []*Comment `json:"replies"`
+	Comment
+	Replies []Thread `json:"replies"`
 }
 
 func (thread Thread) MarshalJSON() ([]byte, error) {
-	ret, err := json.Marshal(*thread.MainComment)
+	ret, err := json.Marshal(&thread.Comment)
 	if err != nil {
 		return ret, err
+	}
+	if thread.Replies == nil {
+		return ret, nil
 	}
 	str := string(ret[:len(ret)-1])
 	str += ",\"replies\":"
@@ -26,19 +29,7 @@ func (thread Thread) MarshalJSON() ([]byte, error) {
 }
 
 func (thread *Thread) UnmarshalJSON(jsonStr []byte) error {
-	if thread.MainComment == nil {
-		thread.MainComment = new(Comment)
-	}
-	err := json.Unmarshal(jsonStr, thread.MainComment)
-	if err != nil {
-		return err
-	}
-	if thread.Replies == nil {
-		thread.Replies = []*Comment{}
-	}
-	leftStr := string(jsonStr)[strings.Index(string(jsonStr), "["):]
-	leftStr = leftStr[:len(leftStr)-1]
-	err = json.Unmarshal([]byte(leftStr), &thread.Replies)
+	err := json.Unmarshal(jsonStr, &thread)
 	return err
 }
 
@@ -50,8 +41,17 @@ func (thread Thread) String() string {
 	return strings.ReplaceAll(string(res), ",", ", ")
 }
 
-func GetThreadOf(comment *Comment) Thread {
-	thread := Thread{MainComment: comment}
-	thread.Replies, _ = GetCommentsOf(comment.Id)
+func (comment Comment) AsThread() Thread {
+	thread := Thread{Comment: comment}
+	if comment.Id == comment.TargetId { // Can't make a Thread with itself
+		return thread
+	}
+	comments, _ := GetCommentsOf(comment.Id)
+	for _, comment := range comments {
+		thread.Replies = append(thread.Replies, GetThreadOf(comment))
+	}
 	return thread
+}
+func GetThreadOf(comment Comment) Thread {
+	return comment.AsThread()
 }

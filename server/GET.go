@@ -17,7 +17,7 @@ func GetTargetedComments(requestInfo *gin.Context) {
 	}
 	var threads []datas.Thread
 	for _, comment := range comments {
-		threads = append(threads, datas.GetThreadOf(comment))
+		threads = append(threads, comment.AsThread())
 	}
 	fmt.Println(threads)
 	requestInfo.IndentedJSON(http.StatusOK, threads)
