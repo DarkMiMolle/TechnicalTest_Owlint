@@ -48,6 +48,13 @@ func forwardToOtherService(comment datas.Comment) {
 	fmt.Println("STATUS: " + comingResp.Get().Status + "\nContent: " + string(receivedData[:n]))
 }
 
+// PostReplyComment
+//
+// function handler of the http.POST request to the url:
+//
+// /target/:targetId/comment
+//
+// with required body as datas.Comment (NewComment)
 func PostReplyComment(requestInfo *gin.Context) {
 	targetId := requestInfo.Param("targetId")
 	var newComment datas.Comment

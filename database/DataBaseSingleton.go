@@ -27,6 +27,7 @@ var db *mongo.Database = func() *mongo.Database {
 	return db
 }()
 
+// DataBase actually return the used Collection since we use only one collection
 func DataBase() *mongo.Collection {
 	return db.Collection("Comment")
 }

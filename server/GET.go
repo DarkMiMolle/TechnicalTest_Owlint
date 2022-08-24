@@ -7,6 +7,11 @@ import (
 	"net/http"
 )
 
+// GetTargetedComments
+//
+// function handler of the http.GET request to the url:
+//
+// /target/:targetId/comment
 func GetTargetedComments(requestInfo *gin.Context) {
 	fmt.Println("GET Targeted Comment")
 	targetId := requestInfo.Param("targetId")

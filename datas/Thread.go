@@ -27,12 +27,10 @@ func (thread Thread) MarshalJSON() ([]byte, error) {
 	str += string(ret) + "}"
 	return []byte(str), err
 }
-
 func (thread *Thread) UnmarshalJSON(jsonStr []byte) error {
 	err := json.Unmarshal(jsonStr, &thread)
 	return err
 }
-
 func (thread Thread) String() string {
 	res, err := thread.MarshalJSON()
 	if err != nil {
@@ -41,6 +39,7 @@ func (thread Thread) String() string {
 	return strings.ReplaceAll(string(res), ",", ", ")
 }
 
+// AsThread transform a simple Comment to a full Thread
 func (comment Comment) AsThread() Thread {
 	thread := Thread{Comment: comment}
 	if comment.Id == comment.TargetId { // Can't make a Thread with itself
@@ -48,10 +47,12 @@ func (comment Comment) AsThread() Thread {
 	}
 	comments, _ := GetCommentsOf(comment.Id)
 	for _, comment := range comments {
-		thread.Replies = append(thread.Replies, GetThreadOf(comment))
+		thread.Replies = append(thread.Replies, comment.AsThread())
 	}
 	return thread
 }
-func GetThreadOf(comment Comment) Thread {
-	return comment.AsThread()
+
+// AsThread overriding the Comment implem of that method since it is already a Thread.
+func (th Thread) AsThread() Thread {
+	return th
 }

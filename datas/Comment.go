@@ -15,6 +15,7 @@ import (
 // Text can be translate from en <-> fr
 type Text string
 
+// TranslateInFrEn translate the text in both languages fr and en
 func (text Text) TranslateInFrEn() (fr, en Text, err error) {
 	if text == "" {
 		return "", "", nil
@@ -28,6 +29,8 @@ func (text Text) TranslateInFrEn() (fr, en Text, err error) {
 	en = Text(enStr)
 	return
 }
+
+// TranslateToEn translate to english
 func (text Text) TranslateToEn() (en Text, err error) {
 	if text == "" {
 		return "", nil
@@ -36,6 +39,8 @@ func (text Text) TranslateToEn() (en Text, err error) {
 	en = Text(enStr)
 	return
 }
+
+// TranslateToFr translate to french
 func (text Text) TranslateToFr() (fr Text, err error) {
 	if text == "" {
 		return "", nil
@@ -55,7 +60,6 @@ func (t timestamp) MarshalJSON() ([]byte, error) {
 	str := fmt.Sprint(t.Unix())
 	return []byte(strconv.Quote(str)), nil
 }
-
 func (t *timestamp) UnmarshalJSON(content []byte) error {
 	str := string(content)
 	str, err := strconv.Unquote(str)
@@ -67,18 +71,20 @@ func (t *timestamp) UnmarshalJSON(content []byte) error {
 	return err
 }
 
-// Comment is the representation of a comment in the DataBase (and through the API argument)
+// Comment is the representation of a comment in the DataBase (and through the API argument it is a Comment without replies)
 type Comment struct {
 	Id          string    `json:"id,omitempty"`
-	TextFr      Text      `json:"textFr"`
-	TextEn      Text      `json:"textEn"`
-	PublishedAt timestamp `json:"publishedAt"` // PublishedAt is a string in the json file
-	AuthorId    string    `json:"authorId"`
-	TargetId    string    `json:"targetId"`
+	TextFr      Text      `json:"textFr,omitempty"`
+	TextEn      Text      `json:"textEn,omitempty"`
+	PublishedAt timestamp `json:"publishedAt,omitempty"` // PublishedAt is a string in the json file
+	AuthorId    string    `json:"authorId,omitempty"`
+	TargetId    string    `json:"targetId,omitempty"`
 }
 
+// lastComment to remove ? depreciated
 var lastComment = &Comment{}
 
+// GetComment to remove ? depreciated
 func GetComment(id string) *Comment {
 	if lastComment.Id != id {
 		res := DataBase().FindOne(context.Background(), bson.D{{"id", id}})
@@ -91,6 +97,7 @@ func GetComment(id string) *Comment {
 	return lastComment
 }
 
+// GetCommentsOf return all the commentary linked to the given targetId from the database
 func GetCommentsOf(targetId string) ([]Comment, error) {
 	sortOpt := options.Find().SetSort(bson.D{{"publishedat", 1}})
 	findRes, err := DataBase().Find(context.Background(), bson.D{{"targetid", targetId}}, sortOpt)
@@ -105,6 +112,8 @@ func GetCommentsOf(targetId string) ([]Comment, error) {
 	}
 	return multipleComment, nil
 }
+
+// RecordComment record (or update) a comment in the database
 func RecordComment(comment Comment) error {
 	res := DataBase().FindOneAndReplace(context.Background(), bson.D{{"id", comment.Id}}, comment)
 	if res.Err() == nil { // Done
