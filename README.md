@@ -26,3 +26,5 @@ root$ mongosh
 ```
 The database is the `technical_test_owlint`, and the collection is `comment`.
 
+---
+Note: In a respectable team it should have more test 😅🫣😆

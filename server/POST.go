@@ -41,16 +41,6 @@ func forwardToOtherService(comment datas.Comment) {
 	})
 	util.PanicErr(err)
 
-	/*resp, err := http.Post(otherServiceURL, "application/json", bytes.NewBuffer(reqBody))
-
-	if err != nil {
-		fmt.Println("how should we handle it ?")
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		fmt.Println("how should we handle it ?")
-	}
-	*/
 	comingResp, _ := otherService.Post("application/json", reqBody)
 
 	receivedData := make([]byte, 2048)
