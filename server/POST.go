@@ -1,16 +1,38 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/DarkMiMolle/TechnicalTest_Owlint/backend"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/datas"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 const otherServiceURL = "https://faulty-backend.herokuapp.com/on_comment"
+
+var otherService = backend.Client{
+	Url: otherServiceURL,
+
+	RetryPolicy: backend.MakeRetryPolicy(
+		backend.RetryPolicyStep{
+			OnStatusCode: []int{429},
+			NbOfRetry:    3,
+			TimeInterval: 3 * time.Second,
+		},
+		backend.RetryPolicyStep{
+			OnStatusCode: []int{400, -500},
+			NbOfRetry:    3,
+			TimeInterval: 2 * time.Second,
+		},
+		backend.RetryPolicyStep{
+			OnStatusCode: []int{500, 1000},
+			NbOfRetry:    1,
+			TimeInterval: 1 * time.Second,
+		}),
+}
 
 func forwardToOtherService(comment datas.Comment) {
 	reqBody, err := json.Marshal(map[string]string{
@@ -19,7 +41,8 @@ func forwardToOtherService(comment datas.Comment) {
 	})
 	util.PanicErr(err)
 
-	resp, err := http.Post(otherServiceURL, "application/json", bytes.NewBuffer(reqBody))
+	/*resp, err := http.Post(otherServiceURL, "application/json", bytes.NewBuffer(reqBody))
+
 	if err != nil {
 		fmt.Println("how should we handle it ?")
 	}
@@ -27,10 +50,12 @@ func forwardToOtherService(comment datas.Comment) {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		fmt.Println("how should we handle it ?")
 	}
+	*/
+	comingResp, _ := otherService.Post("application/json", reqBody)
 
 	receivedData := make([]byte, 2048)
-	n, _ := resp.Body.Read(receivedData)
-	fmt.Println("STATUS: " + resp.Status + "\nContent: " + string(receivedData[:n]))
+	n, _ := comingResp.Get().Body.Read(receivedData)
+	fmt.Println("STATUS: " + comingResp.Get().Status + "\nContent: " + string(receivedData[:n]))
 }
 
 func PostReplyComment(requestInfo *gin.Context) {
