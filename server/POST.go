@@ -1,10 +1,37 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/datas"
+	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
+
+const otherServiceURL = "https://faulty-backend.herokuapp.com/on_comment"
+
+func forwardToOtherService(comment datas.Comment) {
+	reqBody, err := json.Marshal(map[string]string{
+		"message": comment.TextFr.String(),
+		"author":  comment.AuthorId,
+	})
+	util.PanicErr(err)
+
+	resp, err := http.Post(otherServiceURL, "application/json", bytes.NewBuffer(reqBody))
+	if err != nil {
+		fmt.Println("how should we handle it ?")
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		fmt.Println("how should we handle it ?")
+	}
+
+	receivedData := make([]byte, 2048)
+	n, _ := resp.Body.Read(receivedData)
+	fmt.Println("STATUS: " + resp.Status + "\nContent: " + string(receivedData[:n]))
+}
 
 func PostReplyComment(requestInfo *gin.Context) {
 	targetId := requestInfo.Param("targetId")
@@ -33,6 +60,7 @@ func PostReplyComment(requestInfo *gin.Context) {
 			newComment.TextFr = fr
 		}
 	}
+	go forwardToOtherService(newComment)
 	if err := datas.RecordComment(&newComment); err != nil {
 		requestInfo.IndentedJSON(http.StatusNotAcceptable, err.Error())
 		return

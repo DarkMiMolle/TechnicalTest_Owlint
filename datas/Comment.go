@@ -44,6 +44,7 @@ func (text Text) TranslateToFr() (fr Text, err error) {
 	fr = Text(frStr)
 	return
 }
+func (text Text) String() string { return string(text) }
 
 // timestamp allows to use time.Time but will be json-encoded as asked by the API requirements.
 type timestamp struct {
