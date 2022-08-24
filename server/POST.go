@@ -18,6 +18,9 @@ func PostReplyComment(requestInfo *gin.Context) {
 		requestInfo.IndentedJSON(http.StatusBadRequest, "difference between the url targetId: "+targetId+" and the body comment targetId: "+newComment.TargetId)
 		return
 	}
-	datas.RecordComment(&newComment)
+	if err := datas.RecordComment(&newComment); err != nil {
+		requestInfo.IndentedJSON(http.StatusNotAcceptable, err.Error())
+		return
+	}
 	requestInfo.IndentedJSON(http.StatusOK, newComment)
 }

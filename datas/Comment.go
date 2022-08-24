@@ -88,6 +88,11 @@ func GetCommentsOf(targetId string) ([]*Comment, error) {
 	}
 	return multipleComment, nil
 }
-func RecordComment(comment *Comment) {
-	DataBase().InsertOne(context.Background(), comment)
+func RecordComment(comment *Comment) error {
+	res := DataBase().FindOneAndReplace(context.Background(), bson.D{{"id", comment.Id}}, comment)
+	if res.Err() == nil { // Done
+		return nil
+	}
+	_, err := DataBase().InsertOne(context.Background(), comment)
+	return err
 }
