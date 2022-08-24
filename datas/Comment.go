@@ -15,19 +15,34 @@ import (
 // Text can be translate from en <-> fr
 type Text string
 
-func (text Text) TranslateInFrEn() (fr, en string, err error) {
-	fr, err = translate.Translate(string(text), "fr", "en")
+func (text Text) TranslateInFrEn() (fr, en Text, err error) {
+	if text == "" {
+		return "", "", nil
+	}
+	frStr, err := translate.Translate(string(text), "fr", "en")
+	fr = Text(frStr)
 	if err == nil {
 		return
 	}
-	en, err = translate.Translate(string(text), "en", "fr")
+	enStr, err := translate.Translate(string(text), "en", "fr")
+	en = Text(enStr)
 	return
 }
-func (text Text) TranslateToEn() (en string, err error) {
-	return translate.Translate(string(text), "fr", "en")
+func (text Text) TranslateToEn() (en Text, err error) {
+	if text == "" {
+		return "", nil
+	}
+	enStr, err := translate.Translate(string(text), "fr", "en")
+	en = Text(enStr)
+	return
 }
-func (text Text) TranslateToFr() (fr string, err error) {
-	return translate.Translate(string(text), "en", "fr")
+func (text Text) TranslateToFr() (fr Text, err error) {
+	if text == "" {
+		return "", nil
+	}
+	frStr, err := translate.Translate(string(text), "en", "fr")
+	fr = Text(frStr)
+	return
 }
 
 // timestamp allows to use time.Time but will be json-encoded as asked by the API requirements.
@@ -74,6 +89,7 @@ func GetComment(id string) *Comment {
 	}
 	return lastComment
 }
+
 func GetCommentsOf(targetId string) ([]*Comment, error) {
 	sortOpt := options.Find().SetSort(bson.D{{"publishedat", 1}})
 	findRes, err := DataBase().Find(context.Background(), bson.D{{"targetid", targetId}}, sortOpt)
