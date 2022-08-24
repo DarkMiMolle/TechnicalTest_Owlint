@@ -6,17 +6,24 @@ import (
 	"time"
 )
 
+/*
+RetryPolicyStep represents one retry behavior according to the status code indicated.
+*/
 type RetryPolicyStep struct {
+	// OnStatusCode
 	// if OnStatusCode.len == 1 it is only one code
 	// if == 2 it is an interval. A negative number on the interval is for exclude it from it (example: [-404, 429] is the interval: ]404; 429]
-	// The numbers can't be < 300
+	// The numbers shall not be < 300
 	OnStatusCode []int
 
+	// NbOfRetry is the number of time we should retry the call to the API
 	NbOfRetry int
 
+	// TimeInterval is the duration between the next try
 	TimeInterval time.Duration
 }
 
+// DoesCodeStatusNeedRetry helps to tell if the code will trigger a retry or not, according to the OnStatusCode value(s)
 func (retry RetryPolicyStep) DoesCodeStatusNeedRetry(code int) bool {
 	if len(retry.OnStatusCode) == 1 {
 		return retry.OnStatusCode[0] == code
@@ -35,11 +42,20 @@ var defaultPolicy = RetryPolicyStep{
 	TimeInterval: 1 * time.Second,
 }
 
+/*
+RetryPolicy represents the whole policy.
+Each RetryPolicyStep will represent a status code (or interval of status code) that needs to be retried.
+*/
 type RetryPolicy []RetryPolicyStep
 
+// MakeRetryPolicy helps to make a RetryPolicy and include a default policy too.
+// The order of each RetryPolicyStep mater, so putting a Retry step on code 429 after a Retry step of interval [400; 500] won't specify the behavior of the policy for code 429
 func MakeRetryPolicy(retryPolicies ...RetryPolicyStep) RetryPolicy {
 	return append(retryPolicies, defaultPolicy)
 }
+
+// RunPolicy execute the call request and will set the response and the error when policy is fully done (max retries or success)
+// That function is won't stop the execution of the main thread, but asking for the willResp/willErr will // TODO: return InComing[Resp/err] instead of using WillSet.
 func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error), willResp WillSet[*http.Response], willErr WillSet[error]) {
 	go func() {
 		resp, err := call()
@@ -54,6 +70,7 @@ func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error), willResp
 					if n > 150 {
 						content = content[:150] + "\n..."
 					}
+					fmt.Printf("=======================================")
 					fmt.Printf("CODE %v\nReceived: %v\n", resp.StatusCode, content)
 					selectedRetry = &retryPolicyStep
 					time.Sleep(retryPolicyStep.TimeInterval)

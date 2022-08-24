@@ -30,7 +30,7 @@ var otherService = backend.Client{
 		backend.RetryPolicyStep{
 			OnStatusCode: []int{500, 1000},
 			NbOfRetry:    1,
-			TimeInterval: 1 * time.Second,
+			TimeInterval: 4 * time.Second,
 		}),
 }
 

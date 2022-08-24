@@ -10,7 +10,7 @@ import (
 func GetTargetedComments(requestInfo *gin.Context) {
 	fmt.Println("GET Targeted Comment")
 	targetId := requestInfo.Param("targetId")
-	comments, err := datas.GetCommentsOf(targetId) // TODO check if valid
+	comments, err := datas.GetCommentsOf(targetId)
 	if err != nil {
 		requestInfo.IndentedJSON(http.StatusNotFound, err.Error())
 		return
