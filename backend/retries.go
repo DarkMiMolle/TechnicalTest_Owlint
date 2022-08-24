@@ -73,8 +73,8 @@ func (retry RetryPolicy) RunPolicy(call func() (*http.Response, error)) (InCResp
 					if n > 150 {
 						content = content[:150] + "\n..."
 					}
-					fmt.Printf("=======================================")
-					fmt.Printf("CODE %v\nReceived: %v\n", resp.StatusCode, content)
+					fmt.Printf("=======================================\n")
+					fmt.Printf("CODE %v\nReceived: %v\n+--\n", resp.StatusCode, content)
 					selectedRetry = &retryPolicyStep
 					time.Sleep(retryPolicyStep.TimeInterval)
 					goto Next // we have a selected retry because we have an error

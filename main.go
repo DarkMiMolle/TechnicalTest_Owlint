@@ -4,12 +4,15 @@ import (
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/server"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 var IP = "localhost"
 
 func main() {
-	IP = "0.0.0.0"
+	if res := os.Getenv("LOCALHOST"); res != "" {
+		IP = res
+	}
 	router := gin.Default()
 
 	// GET request
