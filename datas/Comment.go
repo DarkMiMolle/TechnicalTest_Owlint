@@ -74,13 +74,19 @@ func GetComment(id string) *Comment {
 	}
 	return lastComment
 }
-func GetCommentOf(targetId string) []*Comment {
-	sortOpt := options.Find().SetSort(bson.D{{"publishedAt", 1}})
-	findRes, _ := DataBase().Find(context.Background(), bson.D{{"targetId", targetId}}, sortOpt)
+func GetCommentsOf(targetId string) ([]*Comment, error) {
+	sortOpt := options.Find().SetSort(bson.D{{"publishedat", 1}})
+	findRes, err := DataBase().Find(context.Background(), bson.D{{"targetid", targetId}}, sortOpt)
+	if err != nil {
+		return nil, err
+	}
 	var multipleComment []*Comment
 	fmt.Println(multipleComment)
-	_ = findRes.All(context.Background(), &multipleComment)
-	return multipleComment
+	err = findRes.All(context.Background(), &multipleComment)
+	if err != nil {
+		return nil, err
+	}
+	return multipleComment, nil
 }
 func RecordComment(comment *Comment) {
 	DataBase().InsertOne(context.Background(), comment)

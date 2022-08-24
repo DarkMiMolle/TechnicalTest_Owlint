@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"github.com/DarkMiMolle/TechnicalTest_Owlint/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -21,7 +22,9 @@ var db *mongo.Database = func() *mongo.Database {
 	util.PanicErr(err)
 
 	// get collection as ref
-	return client.Database("technical_test_owlint")
+	db := client.Database("technical_test_owlint")
+	fmt.Println("database created")
+	return db
 }()
 
 func DataBase() *mongo.Collection {

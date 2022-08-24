@@ -49,3 +49,9 @@ func (thread Thread) String() string {
 	}
 	return strings.ReplaceAll(string(res), ",", ", ")
 }
+
+func GetThreadOf(comment *Comment) Thread {
+	thread := Thread{MainComment: comment}
+	thread.Replies, _ = GetCommentsOf(comment.Id)
+	return thread
+}
